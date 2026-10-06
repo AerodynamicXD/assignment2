@@ -69,7 +69,6 @@ void sieve(int readFD){
     {
         exit(1);
     }
-
     // read one character at a time until the '\0' that ends each code
     string filterCode;
     string checkCode;
@@ -128,7 +127,7 @@ void childSieve(int readFD){
         bool hasChild = false;
         bool endOfWord = false;
 
-        while(read(sieveFd[READ_END], &c, 1) > 0){
+        while(read(readFD, &c, 1) > 0){
             if(c == '\0'){
                 index++;
                 endOfWord = true;
@@ -136,17 +135,21 @@ void childSieve(int readFD){
 
             if(index == 0){
                 filterCode += c;
-            } else{
-                checkCode += c;
+            } else if(c != '\0'){
+            checkCode += c;
             }
 
             if(endOfWord && index != 1){
-                cout << filterCode << " " << checkCode << endl;
+                cout << filterCode.length() << checkCode.length() << endl;
+                cout << "ChildSieve " << filterCode << " " << checkCode << endl;
                 if(checkCodes(filterCode, checkCode)){
                     //Distinct
-                    write(sieveFd[WRITE_END], &checkCode, checkCode.length() + 1);
+                    cout << "THEY ARE DISTINCT" << endl;
+                    const char *p = checkCode.c_str();
+                    write(sieveFd[WRITE_END], p, checkCode.length() + 1);
                     if(hasChild == false){
-                        childSieve(sieveFd[READ_END]);
+                        //childSieve(sieveFd[READ_END]);
+                        cout << "make kid" << endl;
                         hasChild = true;
                     }
                 }
@@ -154,5 +157,6 @@ void childSieve(int readFD){
             }
             endOfWord = false;
         }
+        
     }
 }
