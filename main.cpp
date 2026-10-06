@@ -9,6 +9,7 @@ using namespace std;
 const int READ_END = 0;
 const int WRITE_END = 1;
 
+void childSieve(int readFD);
 bool checkCodes(string code, string check);
 void sieve(int readFD);
 
