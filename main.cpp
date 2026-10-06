@@ -90,16 +90,12 @@ void sieve(int readFD){
         }
 
         if(endOfWord && index != 1){
-            cout << filterCode.length() << checkCode.length() << endl;
-            cout << filterCode << " " << checkCode << endl;
             if(checkCodes(filterCode, checkCode)){
                 //Distinct
-                cout << "THEY ARE DISTINCT" << endl;
                 const char *p = checkCode.c_str();
                 write(sieveFd[WRITE_END], p, checkCode.length() + 1);
                 if(hasChild == false){
                     childSieve(sieveFd[READ_END]);
-                    cout << "make kid" << endl;
                     hasChild = true;
                 }
             }
