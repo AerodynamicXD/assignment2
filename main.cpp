@@ -14,7 +14,7 @@ bool checkCodes(string code, string check);
 void sieve(int readFD);
 
 int main(int argc, char* argv[]) 
-{    
+{   
     int ParentToSieveFd[2];
     if(pipe(ParentToSieveFd) < 0)
     {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
         for(int i = 1; i < argc; i++){
             write(ParentToSieveFd[WRITE_END], argv[i], strlen(argv[i]) + 1);
         }
-        cout << "done" << endl;
+        //cout << "done" << endl;
         close(ParentToSieveFd[WRITE_END]);
         int status;
 
@@ -104,15 +104,16 @@ void sieve(int readFD){
         }
         endOfWord = false;
     }
-    close(sieveFd[WRITE_END]);
+    cout << getpid() << " " << filterCode << endl;
 }
 void childSieve(int readFD){
     int sieveFd[2];
+
     if(pipe(sieveFd) < 0)
     {
         exit(1);
     }
-    
+
     pid_t childId = fork();
 
     if(childId == 0)
@@ -124,7 +125,6 @@ void childSieve(int readFD){
         int index = 0;
         bool hasChild = false;
         bool endOfWord = false;
-
         while(read(readFD, &c, 1) > 0){
             if(c == '\0'){
                 index++;
@@ -147,7 +147,7 @@ void childSieve(int readFD){
                     write(sieveFd[WRITE_END], p, checkCode.length() + 1);
                     if(hasChild == false){
                         childSieve(sieveFd[READ_END]);
-                        cout << "make kid" << endl;
+                        cout << "make kid " << checkCode << endl;
                         hasChild = true;
                     }
                 }
@@ -155,6 +155,9 @@ void childSieve(int readFD){
             }
             endOfWord = false;
         }
-        
+        close(sieveFd[READ_END];
+        cout << getpid() << " " << filterCode << endl;
+        exit(0);
     }
+    close(sieveFd[WRITE_END]);
 }
