@@ -9,12 +9,12 @@ using namespace std;
 const int READ_END = 0;
 const int WRITE_END = 1;
 
-void childSieve(int readFD);
 bool checkCodes(string code, string check);
 void sieve(int readFD);
 
 int main(int argc, char* argv[]) 
 {   
+    cout << "Finding maximally distinct codes..." << endl;
     int ParentToSieveFd[2];
     if(pipe(ParentToSieveFd) < 0)
     {
@@ -91,7 +91,6 @@ void sieve(int readFD){
         if(endOfWord){
             if(checkCodes(filterCode, checkCode)){
                 if(hasChild == false){
-                    
                     childPid = fork();
                     if(childPid == 0){
                         close(sieveFd[WRITE_END]);
@@ -105,83 +104,10 @@ void sieve(int readFD){
                 const char *p = checkCode.c_str();
                 write(sieveFd[WRITE_END], p, checkCode.length() + 1);
             }
-                
-        } else{
-            break;
-        }
-        close(sieveFd[WRITE_END]);
-    }
-}
-        
-// void testFunc(){
-//     if(endOfWord && index != 1){
-//             if(checkCodes(filterCode, checkCode)){
-//                 //Distinct
-//                 const char *p = checkCode.c_str();
-//                 write(sieveFd[WRITE_END], p, checkCode.length() + 1);
-//                 if(hasChild == false){
-//                     childSieve(sieveFd[READ_END]);
-//                     hasChild = true;
-//                 }
-//             }
-//             checkCode = "";
-//         }
-//         endOfWord = false;
-//         cout << getpid() << " " << filterCode << endl;
-// }
-
-void childSieve(int readFD){
-    int sieveFd[2];
-
-    if(pipe(sieveFd) < 0)
-    {
-        exit(1);
-    }
-
-    pid_t childId = fork();
-
-    if(childId == 0)
-    {
-        cout << "in child" << endl;
-        string filterCode;
-        string checkCode;
-        char c;
-        int index = 0;
-        bool hasChild = false;
-        bool endOfWord = false;
-        while(read(readFD, &c, 1) > 0){
-            if(c == '\0'){
-                index++;
-                endOfWord = true;
-            }
-
-            if(index == 0){
-                filterCode += c;
-            } else if(c != '\0'){
-            checkCode += c;
-            }
-
-            if(endOfWord && index != 1){
-                cout << filterCode.length() << checkCode.length() << endl;
-                cout << "ChildSieve " << filterCode << " " << checkCode << endl;
-                if(checkCodes(filterCode, checkCode)){
-                    //Distinct
-                    cout << "THEY ARE DISTINCT" << endl;
-                    const char *p = checkCode.c_str();
-                    write(sieveFd[WRITE_END], p, checkCode.length() + 1);
-                    if(hasChild == false){
-                        childSieve(sieveFd[READ_END]);
-                        cout << "make kid " << checkCode << endl;
-                        hasChild = true;
-                    }
-                }
             checkCode = "";
-            }
             endOfWord = false;
         }
-        close(sieveFd[READ_END];
-        cout << getpid() << " " << filterCode << endl;
-        exit(0);
     }
     close(sieveFd[WRITE_END]);
+    cout << "Process: "<< getpid() << " my code is: " << filterCode << endl;
 }
