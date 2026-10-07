@@ -35,6 +35,7 @@ int main(int argc, char* argv[])
         for(int i = 1; i < argc; i++){
             write(ParentToSieveFd[WRITE_END], argv[i], strlen(argv[i]) + 1);
         }
+        cout << "done" << endl;
         close(ParentToSieveFd[WRITE_END]);
         int status;
 
@@ -103,6 +104,7 @@ void sieve(int readFD){
         }
         endOfWord = false;
     }
+    close(sieveFd[WRITE_END]);
 }
 void childSieve(int readFD){
     int sieveFd[2];
@@ -110,7 +112,7 @@ void childSieve(int readFD){
     {
         exit(1);
     }
-
+    
     pid_t childId = fork();
 
     if(childId == 0)
@@ -144,7 +146,7 @@ void childSieve(int readFD){
                     const char *p = checkCode.c_str();
                     write(sieveFd[WRITE_END], p, checkCode.length() + 1);
                     if(hasChild == false){
-                        //childSieve(sieveFd[READ_END]);
+                        childSieve(sieveFd[READ_END]);
                         cout << "make kid" << endl;
                         hasChild = true;
                     }
