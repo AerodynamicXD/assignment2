@@ -64,48 +64,72 @@ bool checkCodes(string code, string check)
 }
 
 void sieve(int readFD){
-    int sieveFd[2];
-
-    if(pipe(sieveFd) < 0)
-    {
-        exit(1);
-    }
-    // read one character at a time until the '\0' that ends each code
     string filterCode;
     string checkCode;
     char c;
-    int index = 0;
+    int sieveFd[2];
+
+    if(pipe(sieveFd) < 0){
+        exit(1);
+    }
+    // first word received is this process's filter
+    while(read(readFD, &c, 1) > 0 && c != '\0'){
+        filterCode += c;
+    }
+
     bool hasChild = false;
     bool endOfWord = false;
+    pid_t childPid = -1;
 
     while(read(readFD, &c, 1) > 0){
         if(c == '\0'){
-            index++;
             endOfWord = true;
         }
-
-        if(index == 0){
-            filterCode += c;
-        } else if(c != '\0'){
+        if(c != '\0'){
             checkCode += c;
         }
-
-        if(endOfWord && index != 1){
+        if(endOfWord){
             if(checkCodes(filterCode, checkCode)){
-                //Distinct
-                const char *p = checkCode.c_str();
-                write(sieveFd[WRITE_END], p, checkCode.length() + 1);
                 if(hasChild == false){
-                    childSieve(sieveFd[READ_END]);
+                    
+                    childPid = fork();
+                    if(childPid == 0){
+                        close(sieveFd[WRITE_END]);
+                        close(readFD);
+                        sieve(sieveFd[READ_END]);
+                        exit(0);
+                    }
+                    close(sieveFd[READ_END]);
                     hasChild = true;
                 }
+                const char *p = checkCode.c_str();
+                write(sieveFd[WRITE_END], p, checkCode.length() + 1);
             }
-            checkCode = "";
+                
+        } else{
+            break;
         }
-        endOfWord = false;
+        close(sieveFd[WRITE_END]);
     }
-    cout << getpid() << " " << filterCode << endl;
 }
+        
+// void testFunc(){
+//     if(endOfWord && index != 1){
+//             if(checkCodes(filterCode, checkCode)){
+//                 //Distinct
+//                 const char *p = checkCode.c_str();
+//                 write(sieveFd[WRITE_END], p, checkCode.length() + 1);
+//                 if(hasChild == false){
+//                     childSieve(sieveFd[READ_END]);
+//                     hasChild = true;
+//                 }
+//             }
+//             checkCode = "";
+//         }
+//         endOfWord = false;
+//         cout << getpid() << " " << filterCode << endl;
+// }
+
 void childSieve(int readFD){
     int sieveFd[2];
 
